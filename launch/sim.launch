@@ -1,0 +1,11 @@
+<launch>
+
+<node pkg="joy" type="joy_node" name="Xbox_Controller" args="/dev/input/js0" respawn="true"/>
+
+<node pkg="darc_manual_fly" type="darc_manual_fly_node" name="Input_Passthrough" respawn="true" output="screen"/>
+
+<node pkg = "darc_ardrone"       type="drone_control" name="Drone_Control" respawn = "true" />
+<node pkg = "darc_ardrone"       type="flyfromjoy"    name="Joy_Node"      respawn = "true" />
+
+</launch>
+
