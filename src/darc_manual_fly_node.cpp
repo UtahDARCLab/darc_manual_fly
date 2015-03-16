@@ -1,23 +1,19 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Point.h>
 #include <iostream>
+#include <sensor_msgs/Joy.h>
 
-geometry_msgs::Vector3 u_out;
+geometry_msgs::Twist u_out;
 geometry_msgs::Point point_out;
 
-void u_callback(const geometry_msgs::Vector3& u_in)
+void joy_callback(const sensor_msgs::Joy& u_in)
 {
-    u_out.x = u_in.x;
-    u_out.y = u_in.y;
-    u_out.z = u_in.z;
-}
-
-void point_callback(const geometry_msgs::Vector3& u_in)
-{
-    point_out.x = u_in.x;
-    point_out.y = u_in.y;
-    point_out.z = u_in.z;
+    u_out.angular.x = u_in.axes[0];
+    u_out.angular.y = u_in.axes[1];
+    u_out.angular.z = u_in.axes[3];
+    u_out.linear.z  = u_in.axes[4];
 }
 
 int main(int argc, char** argv)
@@ -27,23 +23,15 @@ int main(int argc, char** argv)
     ros::Rate loop_rate(50);
     
     ros::Publisher u_pub;
-    u_pub = node.advertise<geometry_msgs::Vector3>("new_u",1);
+    u_pub = node.advertise<geometry_msgs::Twist>("desired_u",1);
     
-    ros::Publisher point_pub;
-    point_pub=node.advertise<geometry_msgs::Point>("/vrep/input",1);
+    ros::Subscriber joy_sub;
+    joy_sub = node.subscribe("joy",1,joy_callback);
     
-    ros::Subscriber u_sub;
-    u_sub = node.subscribe("desired_u",1,u_callback);
-    
-    ros::Subscriber point_sub;
-    point_sub = node.subscribe("desired_u",1,point_callback);
-    
-    std::cout << std::endl << std::endl << "Stuff" << std::endl << std::endl;
     while(ros::ok())
     {
+	ros::spinOnce();
         u_pub.publish(u_out);
-        point_pub.publish(point_out);
-        ros::spinOnce();
         loop_rate.sleep();
     }
 }
